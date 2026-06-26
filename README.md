@@ -37,7 +37,6 @@ This project rebuilds that workflow as an automated pipeline, applying the data 
 └──────────────────────────────────────────────────────────────────────┘
 ```
 
-*(See `docs/architecture-diagram.png` for the visual version)*
 
 ## Pipeline Components
 
