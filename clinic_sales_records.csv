@@ -1,0 +1,97 @@
+record_id,record_date,hospital_id,patient_name,chart_no,doctor_name,audiologist_name,transaction_type,brand,product_model,ear_side,sale_price_nzd,repair_fee_nzd,memo
+1,01-06-2026,H-001,James Carter,P1-001,Dr. Sarah Pemberton,Daisy Song,Repair Completed,Signia,Signia Styletto X,Left,0,180,Charging port repair
+2,01-06-2026,H-001,Emily Thompson,P1-003,Dr. James Hargreaves,Daisy Song,Repair Completed,ReSound,ReSound ONE 9,Right,0,280,Volume control replacement
+3,01-06-2026,H-002,Mason Scott,P2-001,Dr. Mark Gillespie,Daisy Song,New Consultation,,,,0,0,"Trial period follow-up, considering purchase"
+4,01-06-2026,H-002,Harper Nelson,P2-004,Dr. Mark Gillespie,Daisy Song,Repair Completed,ReSound,ReSound OMNIA 7,Left,0,220,Shell replacement
+5,01-06-2026,H-002,Benjamin Perez,P2-007,Dr. Mark Gillespie,Daisy Song,Repair Completed,Phonak,Phonak Audeo L90,Both,0,220,Volume control replacement
+6,02-06-2026,H-001,Sarah Mitchell,P1-002,Dr. Sarah Pemberton,Daisy Song,Fitting Completed,ReSound,ReSound OMNIA 5,Left,1800,0,"Unilateral fitting, left-sided loss"
+7,02-06-2026,H-001,Michael Brown,P1-004,Dr. Sarah Pemberton,Daisy Song,Fitting Completed,ReSound,ReSound OMNIA 9,Left,4200,0,Purchased after demo
+8,02-06-2026,H-003,Jack Campbell,P3-001,Dr. Rachel Thorn,Daisy Song,Fitting Completed,Phonak,Phonak Audeo P90,Left,1900,0,First-time hearing aid user
+9,02-06-2026,H-003,Riley Cook,P3-010,Dr. Rachel Thorn,Daisy Song,New Consultation,,,,0,0,Mild high-frequency loss detected
+10,02-06-2026,H-003,Joseph Reed,P3-009,Dr. Rachel Thorn,Daisy Song,New Consultation,,,,0,0,Mild high-frequency loss detected
+11,02-06-2026,H-003,Layla Rogers,P3-008,Dr. Rachel Thorn,Daisy Song,Fitting Completed,ReSound,ReSound OMNIA 5,Both,7600,0,First-time hearing aid user
+12,03-06-2026,H-001,Emily Thompson,P1-003,Dr. James Hargreaves,Daisy Song,Fitting Completed,ReSound,ReSound OMNIA 5,Both,7600,0,Upgrade from previous model
+13,03-06-2026,H-001,Grace Anderson,P1-005,Dr. Sarah Pemberton,Daisy Song,New Consultation,,,,0,0,"Trial period follow-up, considering purchase"
+14,03-06-2026,H-002,Ava Green,P2-002,Dr. Mark Gillespie,Daisy Song,Fitting Completed,Phonak,Phonak Audeo L70,Left,2400,0,"Unilateral fitting, right-sided loss"
+15,03-06-2026,H-002,Elijah Carter,P2-005,Dr. Mark Gillespie,Daisy Song,Fitting Completed,ReSound,ReSound OMNIA 9,Right,3200,0,Purchased after demo
+16,03-06-2026,H-002,Abigail Roberts,P2-008,Dr. Mark Gillespie,Daisy Song,Repair Completed,Signia,Signia Styletto X,Left,0,180,Tubing and dome replaced
+17,04-06-2026,H-001,Michael Brown,P1-004,Dr. James Hargreaves,Daisy Song,Fitting Completed,Phonak,Phonak Audeo P70,Left,4200,0,"Unilateral fitting, left-sided loss"
+18,04-06-2026,H-001,David Coleman,P1-006,Dr. Sarah Pemberton,Daisy Song,Fitting Completed,ReSound,ReSound Key 4,Left,2600,0,"Unilateral fitting, right-sided loss"
+19,04-06-2026,H-003,Scarlett Parker,P3-002,Dr. Rachel Thorn,Daisy Song,Repair Completed,ReSound,ReSound OMNIA 5,Left,0,120,Shell replacement
+20,04-06-2026,H-003,Jack Campbell,P3-001,Dr. Rachel Thorn,Daisy Song,Repair Completed,Phonak,Phonak Audeo L70,Left,0,150,Moisture damage repair
+21,04-06-2026,H-003,Riley Cook,P3-010,Dr. Rachel Thorn,Daisy Song,Repair Completed,ReSound,ReSound Key 4,Right,0,280,Receiver replacement
+22,04-06-2026,H-003,Joseph Reed,P3-009,Dr. Rachel Thorn,Daisy Song,Fitting Completed,ReSound,ReSound Key 4,Right,2600,0,"Unilateral fitting, right-sided loss"
+23,05-06-2026,H-001,Grace Anderson,P1-005,Dr. James Hargreaves,Daisy Song,Repair Completed,Phonak,Phonak Audeo P90,Both,0,320,Shell replacement
+24,05-06-2026,H-001,Sophia Turner,P1-007,Dr. James Hargreaves,Daisy Song,New Consultation,,,,0,0,"Referred by GP, audiogram completed"
+25,05-06-2026,H-002,Logan Baker,P2-003,Dr. Mark Gillespie,Daisy Song,New Consultation,,,,0,0,"Trial period follow-up, considering purchase"
+26,05-06-2026,H-002,Evelyn Mitchell,P2-006,Dr. Mark Gillespie,Daisy Song,Fitting Completed,Phonak,Phonak Naida P90,Left,1900,0,Upgrade from previous model
+27,05-06-2026,H-002,Sebastian Turner,P2-009,Dr. Mark Gillespie,Daisy Song,Fitting Completed,ReSound,ReSound OMNIA 7,Both,5200,0,Bilateral purchase
+28,08-06-2026,H-001,David Coleman,P1-006,Dr. James Hargreaves,Daisy Song,Fitting Completed,ReSound,ReSound Key 4,Left,1800,0,First-time hearing aid user
+29,08-06-2026,H-001,William Foster,P1-008,Dr. James Hargreaves,Daisy Song,New Consultation,,,,0,0,Mild high-frequency loss detected
+30,08-06-2026,H-002,Harper Nelson,P2-004,Dr. Mark Gillespie,Daisy Song,New Consultation,,,,0,0,"First visit, hearing test conducted"
+31,08-06-2026,H-002,Benjamin Perez,P2-007,Dr. Mark Gillespie,Daisy Song,Fitting Completed,ReSound,ReSound OMNIA 7,Both,6400,0,"Unilateral fitting, left-sided loss"
+32,08-06-2026,H-002,Sofia Phillips,P2-010,Dr. Mark Gillespie,Daisy Song,Fitting Completed,ReSound,ReSound OMNIA 5,Both,6400,0,Upgrade from previous model
+33,09-06-2026,H-001,Sophia Turner,P1-007,Dr. James Hargreaves,Daisy Song,Repair Completed,ReSound,ReSound OMNIA 5,Left,0,120,Receiver replacement
+34,09-06-2026,H-001,Olivia Hayes,P1-009,Dr. Sarah Pemberton,Daisy Song,Fitting Completed,ReSound,ReSound OMNIA 5,Right,3800,0,Patient very satisfied with trial
+35,09-06-2026,H-003,Owen Evans,P3-003,Dr. Rachel Thorn,Daisy Song,Fitting Completed,Widex,Widex Evoke 440,Right,2300,0,First-time hearing aid user
+36,09-06-2026,H-003,Scarlett Parker,P3-002,Dr. Rachel Thorn,Daisy Song,Fitting Completed,ReSound,ReSound Key 4,Both,5200,0,Upgrade from previous model
+37,09-06-2026,H-003,Jack Campbell,P3-001,Dr. Rachel Thorn,Daisy Song,Fitting Completed,Phonak,Phonak Audeo P90,Right,2400,0,"Unilateral fitting, right-sided loss"
+38,09-06-2026,H-003,Riley Cook,P3-010,Dr. Rachel Thorn,Daisy Song,Fitting Completed,ReSound,ReSound OMNIA 5,Left,3200,0,"Unilateral fitting, right-sided loss"
+39,10-06-2026,H-001,William Foster,P1-008,Dr. James Hargreaves,Daisy Song,Fitting Completed,ReSound,ReSound ONE 9,Both,8400,0,Bilateral purchase
+40,10-06-2026,H-001,Daniel Walker,P1-010,Dr. Sarah Pemberton,Daisy Song,Repair Completed,ReSound,ReSound Key 4,Both,0,180,Volume control replacement
+41,10-06-2026,H-002,Elijah Carter,P2-005,Dr. Mark Gillespie,Daisy Song,Repair Completed,ReSound,ReSound Key 4,Left,0,320,Charging port repair
+42,10-06-2026,H-002,Abigail Roberts,P2-008,Dr. Mark Gillespie,Daisy Song,Fitting Completed,Signia,Signia Styletto X,Right,1600,0,"Unilateral fitting, left-sided loss"
+43,10-06-2026,H-002,Mason Scott,P2-001,Dr. Mark Gillespie,Daisy Song,Fitting Completed,ReSound,ReSound OMNIA 9,Right,3200,0,Patient very satisfied with trial
+44,11-06-2026,H-001,Olivia Hayes,P1-009,Dr. James Hargreaves,Daisy Song,Fitting Completed,Signia,Signia Pure 7AX,Both,5400,0,First-time hearing aid user
+45,11-06-2026,H-001,Henry Adams,P1-011,Dr. James Hargreaves,Daisy Song,Fitting Completed,ReSound,ReSound OMNIA 7,Right,2600,0,Patient very satisfied with trial
+46,11-06-2026,H-003,Victoria Edwards,P3-004,Dr. Rachel Thorn,Daisy Song,Fitting Completed,ReSound,ReSound Key 4,Right,3200,0,Purchased after demo
+47,11-06-2026,H-003,Owen Evans,P3-003,Dr. Rachel Thorn,Daisy Song,New Consultation,,,,0,0,Mild high-frequency loss detected
+48,11-06-2026,H-003,Scarlett Parker,P3-002,Dr. Rachel Thorn,Daisy Song,Fitting Completed,Phonak,Phonak Naida P90,Both,7000,0,First-time hearing aid user
+49,11-06-2026,H-003,Jack Campbell,P3-001,Dr. Rachel Thorn,Daisy Song,Fitting Completed,Phonak,Phonak Audeo L70,Left,3500,0,"Unilateral fitting, left-sided loss"
+50,12-06-2026,H-001,Daniel Walker,P1-010,Dr. Sarah Pemberton,Daisy Song,Fitting Completed,Phonak,Phonak Audeo L90,Left,4200,0,Bilateral purchase
+51,12-06-2026,H-001,Charlotte Evans,P1-012,Dr. Sarah Pemberton,Daisy Song,Fitting Completed,ReSound,ReSound ONE 7,Right,1800,0,"Unilateral fitting, right-sided loss"
+52,12-06-2026,H-002,Evelyn Mitchell,P2-006,Dr. Mark Gillespie,Daisy Song,Fitting Completed,ReSound,ReSound OMNIA 9,Left,2600,0,Patient very satisfied with trial
+53,12-06-2026,H-002,Sebastian Turner,P2-009,Dr. Mark Gillespie,Daisy Song,Fitting Completed,Phonak,Phonak Audeo P70,Both,5800,0,"Unilateral fitting, right-sided loss"
+54,12-06-2026,H-002,Ava Green,P2-002,Dr. Mark Gillespie,Daisy Song,New Consultation,,,,0,0,"Suspected bilateral hearing loss, demo scheduled"
+55,15-06-2026,H-001,Henry Adams,P1-011,Dr. James Hargreaves,Daisy Song,Fitting Completed,Phonak,Phonak Audeo L70,Both,4800,0,"Unilateral fitting, left-sided loss"
+56,15-06-2026,H-002,Benjamin Perez,P2-007,Dr. Mark Gillespie,Daisy Song,Fitting Completed,Phonak,Phonak Audeo P70,Right,2400,0,Bilateral purchase
+57,15-06-2026,H-002,Sofia Phillips,P2-010,Dr. Mark Gillespie,Daisy Song,Fitting Completed,Widex,Widex Evoke 440,Left,3000,0,First-time hearing aid user
+58,16-06-2026,H-001,Charlotte Evans,P1-012,Dr. James Hargreaves,Daisy Song,Fitting Completed,ReSound,ReSound Key 4,Right,4200,0,Bilateral purchase
+59,16-06-2026,H-003,Aiden Collins,P3-005,Dr. Rachel Thorn,Daisy Song,Fitting Completed,ReSound,ReSound Key 4,Right,2200,0,Purchased after demo
+60,16-06-2026,H-003,Victoria Edwards,P3-004,Dr. Rachel Thorn,Daisy Song,Repair Completed,Signia,Signia Styletto X,Both,0,150,Receiver replacement
+61,16-06-2026,H-003,Owen Evans,P3-003,Dr. Rachel Thorn,Daisy Song,Fitting Completed,ReSound,ReSound ONE 9,Right,3800,0,Purchased after demo
+62,16-06-2026,H-003,Scarlett Parker,P3-002,Dr. Rachel Thorn,Daisy Song,Fitting Completed,Phonak,Phonak Audeo L70,Right,4200,0,"Unilateral fitting, right-sided loss"
+63,17-06-2026,H-001,Liam Harris,P1-013,Dr. Sarah Pemberton,Daisy Song,New Consultation,,,,0,0,"Suspected bilateral hearing loss, demo scheduled"
+64,17-06-2026,H-002,Abigail Roberts,P2-008,Dr. Mark Gillespie,Daisy Song,New Consultation,,,,0,0,"Trial period follow-up, considering purchase"
+65,17-06-2026,H-002,Mason Scott,P2-001,Dr. Mark Gillespie,Daisy Song,Fitting Completed,ReSound,ReSound OMNIA 7,Right,2600,0,Purchased after demo
+66,18-06-2026,H-001,Amelia Clark,P1-014,Dr. James Hargreaves,Daisy Song,Fitting Completed,Phonak,Phonak Audeo L90,Both,5800,0,"Unilateral fitting, right-sided loss"
+67,18-06-2026,H-003,Penelope Stewart,P3-006,Dr. Rachel Thorn,Daisy Song,Repair Completed,Phonak,Phonak Naida P90,Left,0,280,Moisture damage repair
+68,18-06-2026,H-003,Aiden Collins,P3-005,Dr. Rachel Thorn,Daisy Song,Repair Completed,ReSound,ReSound OMNIA 9,Left,0,220,Charging port repair
+69,18-06-2026,H-003,Victoria Edwards,P3-004,Dr. Rachel Thorn,Daisy Song,Fitting Completed,ReSound,ReSound ONE 7,Both,4400,0,Purchased after demo
+70,19-06-2026,H-001,Noah Lewis,P1-015,Dr. James Hargreaves,Daisy Song,Repair Completed,Phonak,Phonak Naida P90,Right,0,320,Charging port repair
+71,19-06-2026,H-002,Sebastian Turner,P2-009,Dr. Mark Gillespie,Daisy Song,Fitting Completed,ReSound,ReSound OMNIA 7,Both,6400,0,Bilateral purchase
+72,19-06-2026,H-002,Ava Green,P2-002,Dr. Mark Gillespie,Daisy Song,Fitting Completed,Signia,Signia Silk X,Left,1600,0,"Unilateral fitting, right-sided loss"
+73,22-06-2026,H-001,Isabella Hall,P1-016,Dr. Sarah Pemberton,Daisy Song,Fitting Completed,Widex,Widex Moment 330,Both,6000,0,Bilateral purchase
+74,22-06-2026,H-002,Sofia Phillips,P2-010,Dr. Mark Gillespie,Daisy Song,Fitting Completed,Phonak,Phonak Audeo P70,Both,5800,0,"Unilateral fitting, left-sided loss"
+75,22-06-2026,H-002,Logan Baker,P2-003,Dr. Mark Gillespie,Daisy Song,Repair Completed,Phonak,Phonak Naida P90,Both,0,220,Volume control replacement
+76,23-06-2026,H-001,Ethan Young,P1-017,Dr. James Hargreaves,Daisy Song,New Consultation,,,,0,0,"First visit, hearing test conducted"
+77,23-06-2026,H-003,Samuel Morris,P3-007,Dr. Rachel Thorn,Daisy Song,Fitting Completed,Signia,Signia Styletto X,Left,2100,0,"Unilateral fitting, right-sided loss"
+78,23-06-2026,H-003,Penelope Stewart,P3-006,Dr. Rachel Thorn,Daisy Song,Fitting Completed,ReSound,ReSound ONE 9,Both,5200,0,Upgrade from previous model
+79,23-06-2026,H-003,Aiden Collins,P3-005,Dr. Rachel Thorn,Daisy Song,New Consultation,,,,0,0,"Suspected bilateral hearing loss, demo scheduled"
+80,24-06-2026,H-001,Mia Allen,P1-018,Dr. Sarah Pemberton,Daisy Song,Fitting Completed,ReSound,ReSound ONE 7,Left,2600,0,Patient very satisfied with trial
+81,24-06-2026,H-002,Mason Scott,P2-001,Dr. Mark Gillespie,Daisy Song,Repair Completed,ReSound,ReSound Key 4,Both,0,120,Tubing and dome replaced
+82,24-06-2026,H-002,Harper Nelson,P2-004,Dr. Mark Gillespie,Daisy Song,Fitting Completed,ReSound,ReSound ONE 7,Right,1800,0,Purchased after demo
+83,25-06-2026,H-001,Lucas King,P1-019,Dr. James Hargreaves,Daisy Song,Fitting Completed,Phonak,Phonak Naida P90,Both,7000,0,Bilateral purchase
+84,25-06-2026,H-003,Layla Rogers,P3-008,Dr. Rachel Thorn,Daisy Song,Fitting Completed,Phonak,Phonak Audeo L70,Both,3800,0,Upgrade from previous model
+85,25-06-2026,H-003,Samuel Morris,P3-007,Dr. Rachel Thorn,Daisy Song,Fitting Completed,Signia,Signia Pure 7AX,Left,1600,0,First-time hearing aid user
+86,25-06-2026,H-003,Penelope Stewart,P3-006,Dr. Rachel Thorn,Daisy Song,Fitting Completed,ReSound,ReSound ONE 7,Left,4200,0,First-time hearing aid user
+87,26-06-2026,H-001,Emma Wright,P1-020,Dr. Sarah Pemberton,Daisy Song,Fitting Completed,Signia,Signia Pure 7AX,Both,5400,0,Purchased after demo
+88,26-06-2026,H-002,Ava Green,P2-002,Dr. Mark Gillespie,Daisy Song,Fitting Completed,Phonak,Phonak Audeo L90,Both,3800,0,First-time hearing aid user
+89,26-06-2026,H-002,Elijah Carter,P2-005,Dr. Mark Gillespie,Daisy Song,Fitting Completed,ReSound,ReSound Key 4,Both,4400,0,Purchased after demo
+90,29-06-2026,H-001,James Carter,P1-001,Dr. Sarah Pemberton,Daisy Song,Fitting Completed,ReSound,ReSound OMNIA 9,Left,2200,0,Bilateral purchase
+91,29-06-2026,H-002,Logan Baker,P2-003,Dr. Mark Gillespie,Daisy Song,Fitting Completed,ReSound,ReSound OMNIA 9,Right,2200,0,Bilateral purchase
+92,29-06-2026,H-002,Evelyn Mitchell,P2-006,Dr. Mark Gillespie,Daisy Song,Fitting Completed,ReSound,ReSound ONE 7,Right,2200,0,Patient very satisfied with trial
+93,30-06-2026,H-001,Sarah Mitchell,P1-002,Dr. Sarah Pemberton,Daisy Song,Fitting Completed,Phonak,Phonak Audeo P70,Left,4200,0,"Unilateral fitting, left-sided loss"
+94,30-06-2026,H-003,Joseph Reed,P3-009,Dr. Rachel Thorn,Daisy Song,New Consultation,,,,0,0,"Referred by GP, audiogram completed"
+95,30-06-2026,H-003,Layla Rogers,P3-008,Dr. Rachel Thorn,Daisy Song,Fitting Completed,ReSound,ReSound OMNIA 5,Left,2600,0,Upgrade from previous model
+96,30-06-2026,H-003,Samuel Morris,P3-007,Dr. Rachel Thorn,Daisy Song,Fitting Completed,ReSound,ReSound OMNIA 7,Both,5200,0,Purchased after demo
