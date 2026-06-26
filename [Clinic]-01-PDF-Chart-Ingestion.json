@@ -1,0 +1,822 @@
+{
+  "name": "[Clinic]-01-PDF-Chart-Ingestion",
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "pdf",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        -656,
+        256
+      ],
+      "id": "91be23de-5a1d-4647-bb2d-a31aa6cf3000",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "responses": {
+          "values": [
+            {
+              "role": "system",
+              "content": "You are a medical document parser for a hearing aid clinic. \nExtract structured data from consultation chart text and return ONLY valid JSON with no markdown, no explanation, no code blocks."
+            },
+            {
+              "content": "=Extract the following fields from this hearing aid consultation chart and return ONLY a JSON object with no markdown, no explanation, no code blocks.\n------------------------------------------------------------------------------\nIMPORTANT RULES:\n- Date format in the document is DD-MM-YYYY. Convert to YYYY-MM-DD format. For example, 01-06-2026 becomes 2026-06-01.\n- If a field value is \"-\" or empty, return null for that field.\n- Return all fields even if null.\n------------------------------------------------------------------------------\n{\n  \"chart_no\": \"patient chart number (e.g. P1-001)\",\n  \"patient_name\": \"full patient name\",\n  \"consult_date\": \"date in YYYY-MM-DD format\",\n  \"doctor_name\": \"doctor full name without Dr. prefix\",\n  \"audiologist_name\": \"audiologist full name\",\n  \"ear_side\": \"Left / Right / Both or null\",\n  \"demo_model\": \"hearing aid model name or null\",\n  \"record_type\": \"one of: New Consultation / Fitting Completed / Repair Completed\",\n  \"hospital_name\": \"clinic name at bottom of document\",\n  \"consult_note\": \"full consultation note text in the body of the document\"\n}\n------------------------------------------------------------------------------\nChart text:\n{{ $json.text }}\n"
+            }
+          ]
+        },
+        "simplify": false,
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.3,
+      "position": [
+        -432,
+        256
+      ],
+      "id": "a396b1d3-c3e3-4df9-adfa-88d62f7589a2",
+      "name": "Extract Data",
+      "credentials": {
+        "openAiApi": {
+          "id": "dweDSVlnit6vlN5h",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "return $input.all().map(item => {\n  const raw = item.json.output[0].content[0].text;\n  const parsed = JSON.parse(raw);\n  \n  const hospitalMap = {\n    'Christchurch ENT Clinic': 'H-001',\n    'Selwyn Hearing Centre': 'H-002',\n    'Canterbury Audiology Associates': 'H-003'\n  };\n  \n  parsed.hospital_id = hospitalMap[parsed.hospital_name] || null;\n  \n  return { json: parsed };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -80,
+        256
+      ],
+      "id": "54bfe6a4-fbb9-4800-8b24-e4980f02565c",
+      "name": "Parse & Map"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.record_type }}",
+                    "rightValue": "New Consultation",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "77b1ff6f-5b60-47d2-9a09-cc5cbcd2b9cd"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "New"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "9757b4cb-c999-41e2-9518-ddb200fb0cb9",
+                    "leftValue": "={{ $json.record_type }}",
+                    "rightValue": "Fitting Completed",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Fitting"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "f6d8f056-929b-41fc-9fd8-49c8b96b2fa9",
+                    "leftValue": "={{ $json.record_type }}",
+                    "rightValue": "Repair Completed",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Repair"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        144,
+        240
+      ],
+      "id": "e3d62ede-519f-4ca3-9a9f-ea003e6f38e2",
+      "name": "Switch",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -880,
+        256
+      ],
+      "id": "7a235218-e533-4a16-9db8-73d2cd291a00",
+      "name": "Download file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "2aS9RcHeRXOKbexY",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "fileFolder",
+        "returnAll": true,
+        "filter": {
+          "folderId": {
+            "__rl": true,
+            "value": "1MXYJNfROQMNV2SHgS2FpMBaIhJ8gwuCV",
+            "mode": "list",
+            "cachedResultName": "Charts",
+            "cachedResultUrl": "https://drive.google.com/drive/folders/1MXYJNfROQMNV2SHgS2FpMBaIhJ8gwuCV"
+          },
+          "whatToSearch": "files"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -1104,
+        256
+      ],
+      "id": "af7d2780-cb0a-4e57-a9dd-035bba23e19f",
+      "name": "Search files and folders",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "2aS9RcHeRXOKbexY",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 19
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -1328,
+        256
+      ],
+      "id": "2e070c28-8d0d-49f7-b772-be6ac2de0727",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "consultation_charts",
+          "mode": "list",
+          "cachedResultName": "consultation_charts"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "hospital_id": "={{ $json.hospital_id }}",
+            "chart_no": "={{ $json.chart_no }}",
+            "patient_name": "={{ $json.patient_name }}",
+            "consult_date": "={{ $json.consult_date }}",
+            "doctor_name": "={{ $json.doctor_name }}",
+            "audiologist_name": "={{ $json.audiologist_name }}",
+            "ear_side": "={{ $json.ear_side }}",
+            "demo_model": "={{ $json.demo_model }}",
+            "record_type": "={{ $json.record_type }}",
+            "consult_note": "={{ $json.consult_note }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "chart_id",
+              "displayName": "chart_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "hospital_id",
+              "displayName": "hospital_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "chart_no",
+              "displayName": "chart_no",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "patient_name",
+              "displayName": "patient_name",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "consult_date",
+              "displayName": "consult_date",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "doctor_name",
+              "displayName": "doctor_name",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "audiologist_name",
+              "displayName": "audiologist_name",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "ear_side",
+              "displayName": "ear_side",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "demo_model",
+              "displayName": "demo_model",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "consult_note",
+              "displayName": "consult_note",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "record_type",
+              "displayName": "record_type",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "created_at",
+              "displayName": "created_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        368,
+        64
+      ],
+      "id": "37f513bc-d931-47db-ab57-b5bfc6ab8ed9",
+      "name": "Insert (New)",
+      "credentials": {
+        "postgres": {
+          "id": "D9gobW4SLwz1r72p",
+          "name": "Postgres account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "consultation_charts",
+          "mode": "list",
+          "cachedResultName": "consultation_charts"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "hospital_id": "={{ $json.hospital_id }}",
+            "chart_no": "={{ $json.chart_no }}",
+            "patient_name": "={{ $json.patient_name }}",
+            "consult_date": "={{ $json.consult_date }}",
+            "doctor_name": "={{ $json.doctor_name }}",
+            "audiologist_name": "={{ $json.audiologist_name }}",
+            "ear_side": "={{ $json.ear_side }}",
+            "demo_model": "={{ $json.demo_model }}",
+            "record_type": "={{ $json.record_type }}",
+            "consult_note": "={{ $json.consult_note }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "chart_id",
+              "displayName": "chart_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "hospital_id",
+              "displayName": "hospital_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "chart_no",
+              "displayName": "chart_no",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "patient_name",
+              "displayName": "patient_name",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "consult_date",
+              "displayName": "consult_date",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "doctor_name",
+              "displayName": "doctor_name",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "audiologist_name",
+              "displayName": "audiologist_name",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "ear_side",
+              "displayName": "ear_side",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "demo_model",
+              "displayName": "demo_model",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "consult_note",
+              "displayName": "consult_note",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "record_type",
+              "displayName": "record_type",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "created_at",
+              "displayName": "created_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        368,
+        256
+      ],
+      "id": "64c317ff-903c-406b-8907-66a72f0c0d5d",
+      "name": "Insert (Fitting)",
+      "credentials": {
+        "postgres": {
+          "id": "D9gobW4SLwz1r72p",
+          "name": "Postgres account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "consultation_charts",
+          "mode": "list",
+          "cachedResultName": "consultation_charts"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "hospital_id": "={{ $json.hospital_id }}",
+            "chart_no": "={{ $json.chart_no }}",
+            "patient_name": "={{ $json.patient_name }}",
+            "consult_date": "={{ $json.consult_date }}",
+            "doctor_name": "={{ $json.doctor_name }}",
+            "audiologist_name": "={{ $json.audiologist_name }}",
+            "ear_side": "={{ $json.ear_side }}",
+            "demo_model": "={{ $json.demo_model }}",
+            "record_type": "={{ $json.record_type }}",
+            "consult_note": "={{ $json.consult_note }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "chart_id",
+              "displayName": "chart_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "hospital_id",
+              "displayName": "hospital_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "chart_no",
+              "displayName": "chart_no",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "patient_name",
+              "displayName": "patient_name",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "consult_date",
+              "displayName": "consult_date",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "doctor_name",
+              "displayName": "doctor_name",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "audiologist_name",
+              "displayName": "audiologist_name",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "ear_side",
+              "displayName": "ear_side",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "demo_model",
+              "displayName": "demo_model",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "consult_note",
+              "displayName": "consult_note",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "record_type",
+              "displayName": "record_type",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "created_at",
+              "displayName": "created_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        368,
+        448
+      ],
+      "id": "d5e112e1-4c2e-4827-8f19-8725bcdcfbb4",
+      "name": "Insert (Repair)",
+      "credentials": {
+        "postgres": {
+          "id": "D9gobW4SLwz1r72p",
+          "name": "Postgres account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Extract Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Data": {
+      "main": [
+        [
+          {
+            "node": "Parse & Map",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse & Map": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Insert (New)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Insert (Fitting)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Insert (Repair)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search files and folders": {
+      "main": [
+        [
+          {
+            "node": "Download file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Search files and folders",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "208add73-563c-43ea-846e-0291f30c3a6c",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "558d88703fb65b2d0e44613bc35916258b0f0bf983c5d4730c00c424b77ca36a"
+  },
+  "nodeGroups": [],
+  "id": "EV357dAHUWABXVEh",
+  "tags": []
+}

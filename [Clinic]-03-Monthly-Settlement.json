@@ -1,0 +1,347 @@
+{
+  "name": "[Clinic]-03-Monthly-Settlement",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "months",
+              "triggerAtHour": 12
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -512,
+        64
+      ],
+      "id": "cb2a46d4-1514-48ef-b974-ac639150df09",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT\n    s.hospital_id,\n    h.hospital_name,\n    s.record_date,\n    s.patient_name,\n    s.brand,\n    s.product_model,\n    s.ear_side,\n    s.sale_price,\n    h.revenue_share_rate,\n    ROUND(s.sale_price * h.revenue_share_rate, 0) AS hospital_share\nFROM clinic_sales_records s\nJOIN hospitals h ON s.hospital_id = h.hospital_id\nWHERE s.transaction_type = 'Fitting Completed'\n  AND s.record_date >= '{{ $json.dateFrom }}'\n  AND s.record_date <= '{{ $json.dateTo }}'\nORDER BY h.hospital_name, s.record_date;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -64,
+        -128
+      ],
+      "id": "22739977-ea69-46f4-acc4-b4948f52e451",
+      "name": "Hospital Settlement",
+      "alwaysOutputData": false,
+      "credentials": {
+        "postgres": {
+          "id": "D9gobW4SLwz1r72p",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT\n    s.record_date,\n    h.hospital_name,\n    s.patient_name,\n    s.product_model,\n    s.ear_side,\n    s.transaction_type,\n    s.sale_price,\n    s.repair_fee,\n    ROUND(s.sale_price * (1 - h.revenue_share_rate), 0) AS our_sales_share,\n    s.repair_fee AS exclusive_repair_revenue\nFROM clinic_sales_records s\nJOIN hospitals h ON s.hospital_id = h.hospital_id\nWHERE s.brand = 'ReSound'\n  AND s.transaction_type IN ('Fitting Completed', 'Repair Completed')\n  AND s.record_date >= '{{ $json.dateFrom }}'\n  AND s.record_date <= '{{ $json.dateTo }}'\nORDER BY s.record_date;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -64,
+        64
+      ],
+      "id": "6e766d88-99b9-44f1-acf0-6f1508c255b8",
+      "name": "Resound Closing",
+      "credentials": {
+        "postgres": {
+          "id": "D9gobW4SLwz1r72p",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT\n    s.record_date,\n    h.hospital_name,\n    s.patient_name,\n    s.brand,\n    s.product_model,\n    s.ear_side,\n    s.transaction_type,\n    s.sale_price,\n    s.repair_fee\nFROM clinic_sales_records s\nJOIN hospitals h ON s.hospital_id = h.hospital_id\nWHERE s.brand IN ('Phonak', 'Signia', 'Widex')\n  AND s.transaction_type IN ('Fitting Completed', 'Repair Completed')\n  AND s.record_date >= '{{ $json.dateFrom }}'\n  AND s.record_date <= '{{ $json.dateTo }}'\nORDER BY s.brand, s.record_date;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -64,
+        256
+      ],
+      "id": "e5b9fec4-efd8-458a-864b-f6dc0841e000",
+      "name": "Competitor Closing",
+      "credentials": {
+        "postgres": {
+          "id": "D9gobW4SLwz1r72p",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// 테스트용 - 현재 달 조회\nconst now = new Date();\nconst firstDay = new Date(now.getFullYear(), now.getMonth(), 1);\nconst lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);\n\nconst toNZ = (d) => {\n  const dd = String(d.getDate()).padStart(2, '0');\n  const mm = String(d.getMonth() + 1).padStart(2, '0');\n  const yyyy = d.getFullYear();\n  return `${dd}-${mm}-${yyyy}`;\n};\n\nconst toISO = (d) => d.toISOString().split('T')[0];\n\nconst monthLabel = firstDay.toLocaleString('en-NZ', { year: 'numeric', month: 'long' });\n\nreturn [{\n  json: {\n    dateFrom: toISO(firstDay),   // PostgreSQL  \"2025-05-01\"\n    dateTo: toISO(lastDay),      // PostgreSQL  \"2025-05-31\"\n    dateFromNZ: toNZ(firstDay),  // Display \"01-05-2025\"\n    dateToNZ: toNZ(lastDay),     // Display \"31-05-2025\"\n    monthLabel                   // \"May 2025\"\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -288,
+        64
+      ],
+      "id": "222ca0b7-40bd-438b-b154-ca94fe4469b4",
+      "name": "Date Filter"
+    },
+    {
+      "parameters": {
+        "jsCode": "const hospitalInfo = {\n  'H-001': { email: 'chchent@examples.com' },\n  'H-002': { email: 'selwynhearing@examples.com' },\n  'H-003': { email: 'Canterburyaa@examples.com' }\n};\n\nconst formatNZD = (amount) => {\n  return Number(amount).toLocaleString('en-NZ', {\n    minimumFractionDigits: 2,\n    maximumFractionDigits: 2\n  });\n};\nconst rows = $input.all();\nconst monthLabel = $('Date Filter').first().json.monthLabel;\n\n// Grouping with hospital name\nconst hospitals = {};\nfor (const row of rows) {\n  const d = row.json;\n  const key = d.hospital_id;\n  if (!hospitals[key]) {\n    hospitals[key] = {\n      hospital_id: d.hospital_id,\n      hospital_name: d.hospital_name,\n      rows: []\n    };\n  }\n  hospitals[key].rows.push(d);\n}\n\n// Generate per hospital\nconst results = [];\n\nfor (const key of Object.keys(hospitals)) {\n  const hospital = hospitals[key];\n  const headers = [\n    'Date', 'Patient', 'Brand', 'Model', 'Ear Side',\n    'Sale Price (NZD)', 'Revenue Share Rate', 'Hospital Share (NZD)'\n  ];\n\n  const lines = [headers.join(',')];\n  let totalSalePrice = 0;\n  let totalHospitalShare = 0;\n\n  for (const d of hospital.rows) {\n    const date = new Date(d.record_date).toLocaleDateString('en-NZ', {\n      day: '2-digit', month: '2-digit', year: 'numeric'\n    }).replace(/\\//g, '-');\n\n    totalSalePrice += Number(d.sale_price);\n    totalHospitalShare += Number(d.hospital_share);\n\n    lines.push([\n      date,\n      `\"${d.patient_name}\"`,\n      d.brand || '',\n      `\"${d.product_model || ''}\"`,\n      d.ear_side || '',\n      d.sale_price,\n      d.revenue_share_rate,\n      d.hospital_share\n    ].join(','));\n  }\n\n  lines.push([\n    '', '', '', '', 'TOTAL',\n    totalSalePrice.toFixed(2),\n    '',\n    totalHospitalShare.toFixed(2)\n  ].join(','));\n\n  const base64 = Buffer.from(lines.join('\\n')).toString('base64');\n\n  results.push({\n    json: {\n      hospital_id: hospital.hospital_id,\n      hospital_name: hospital.hospital_name,\n      contact_email: hospitalInfo[hospital.hospital_id].email,\n      fileName: `Hospital_Settlement_${hospital.hospital_name.replace(/ /g, '_')}_${monthLabel.replace(' ', '_')}.csv`,\n      monthLabel,\n      totalSalePrice: formatNZD(totalSalePrice),\n      totalHospitalShare: formatNZD(totalHospitalShare)\n    },\n    binary: {\n      data: {\n        data: Buffer.from(lines.join('\\n')).toString('base64'),\n        mimeType: 'text/csv',\n        fileName: `Hospital_Settlement_${hospital.hospital_name.replace(/ /g, '_')}_${monthLabel.replace(' ', '_')}.csv`\n      }\n    }\n  });\n}\n\nreturn results;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        160,
+        -128
+      ],
+      "id": "20ccfea4-9622-43f2-9382-69f129ed4cb0",
+      "name": "Generate Excel (Hospital)"
+    },
+    {
+      "parameters": {
+        "jsCode": "const formatNZD = (amount) => {\n  return Number(amount).toLocaleString('en-NZ', {\n    minimumFractionDigits: 2,\n    maximumFractionDigits: 2\n  });\n};\nconst rows = $input.all();\n\nconst headers = [\n  'Date', 'Hospital', 'Patient', 'Model', 'Ear Side',\n  'Transaction Type', 'Sale Price (NZD)', 'Repair Fee (NZD)',\n  'Our Sales Share (NZD)', 'Repair Revenue (NZD)'\n];\n\nconst lines = [headers.join(',')];\n\nlet totalSalePrice = 0;\nlet totalRepairFee = 0;\nlet totalOurShare = 0;\nlet totalRepairRevenue = 0;\n\nfor (const row of rows) {\n  const d = row.json;\n  const date = new Date(d.record_date).toLocaleDateString('en-NZ', {day:'2-digit', month:'2-digit', year:'numeric'}).replace(/\\//g, '-');\n  totalSalePrice += Number(d.sale_price);\n  totalRepairFee += Number(d.repair_fee);\n  totalOurShare += Number(d.our_sales_share);\n  totalRepairRevenue += Number(d.exclusive_repair_revenue);\n\n  lines.push([\n    date,\n    `\"${d.hospital_name}\"`,\n    `\"${d.patient_name}\"`,\n    `\"${d.product_model || ''}\"`,\n    d.ear_side || '',\n    d.transaction_type,\n    d.sale_price,\n    d.repair_fee,\n    d.our_sales_share,\n    d.exclusive_repair_revenue\n  ].join(','));\n}\n\nlines.push([\n  '', '', '', '', '', 'TOTAL',\n  totalSalePrice.toFixed(2),\n  totalRepairFee.toFixed(2),\n  totalOurShare.toFixed(2),\n  totalRepairRevenue.toFixed(2)\n].join(','));\n\nconst csvContent = lines.join('\\n');\nconst base64 = Buffer.from(csvContent).toString('base64');\nconst monthLabel = $('Date Filter').first().json.monthLabel;\n\nreturn [{\n  json: {\n    fileName: `ReSound_Closing_${monthLabel.replace(' ', '_')}.csv`,\n    monthLabel,\n    totalSalePrice: formatNZD(totalSalePrice),\n    totalRepairFee: formatNZD(totalRepairFee),\n    totalOurShare: formatNZD(totalOurShare),\n    totalRepairRevenue: formatNZD(totalRepairRevenue)\n  },\n  binary: {\n    data: {\n      data: Buffer.from(csvContent).toString('base64'),\n      mimeType: 'text/csv',\n      fileName: `ReSound_Closing_${monthLabel.replace(' ', '_')}.csv`\n    }\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        160,
+        64
+      ],
+      "id": "b3bbec7a-61d2-4dd6-9fb1-4f2a217725a7",
+      "name": "Generate Excel (Resound)"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.contact_email }}",
+        "subject": "=Hospital Settlement Report - {{ $json.monthLabel }}",
+        "message": "=<p>Dear <strong>{{ $json.hospital_name }}</strong>,</p>\n\n<p>Please find attached your hearing aid settlement report for <strong>{{ $json.monthLabel }}</strong>.</p>\n\n<table style=\"border-collapse: collapse; width: 350px;\">\n  <tr style=\"background-color: #f2f2f2;\">\n    <td style=\"padding: 10px; border: 1px solid #ddd;\"><strong>Total Sales</strong></td>\n    <td style=\"padding: 10px; border: 1px solid #ddd;\">NZD {{ $json.totalSalePrice }}</td>\n  </tr>\n  <tr>\n    <td style=\"padding: 10px; border: 1px solid #ddd;\"><strong>Your Revenue Share</strong></td>\n    <td style=\"padding: 10px; border: 1px solid #ddd;\">NZD {{ $json.totalHospitalShare }}</td>\n  </tr>\n</table>\n\n<br>\n<p>Please do not hesitate to contact us if you have any questions.</p>\n\n<p>Kind regards,<br>\n<strong>Daisy Song</strong><br>\nHearing Clinic</p>",
+        "options": {
+          "attachmentsUi": {
+            "attachmentsBinary": [
+              {}
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        384,
+        -128
+      ],
+      "id": "6e98b45d-355b-4c82-acbf-41d7103de3ee",
+      "name": "Send to Hospital",
+      "webhookId": "05e532a9-a2e9-4b80-b7bd-8f02b8e15ef9",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "KSfJ66EkZPNjjcNB",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "resound@examples.com",
+        "subject": "=ReSound Closing Report - {{ $json.monthLabel }}",
+        "message": "=<p>Dear <strong>ReSound Team</strong>,</p>\n\n<p>Please find attached the ReSound closing report for <strong>{{ $json.monthLabel }}</strong>.</p>\n\n<table style=\"border-collapse: collapse; width: 350px;\">\n  <tr style=\"background-color: #f2f2f2;\">\n    <td style=\"padding: 10px; border: 1px solid #ddd;\"><strong>Total Sales</strong></td>\n    <td style=\"padding: 10px; border: 1px solid #ddd;\">NZD {{ $json.totalSalePrice }}</td>\n  </tr>\n  <tr>\n    <td style=\"padding: 10px; border: 1px solid #ddd;\"><strong>Our Sales Share</strong></td>\n    <td style=\"padding: 10px; border: 1px solid #ddd;\">NZD {{ $json.totalOurShare }}</td>\n  </tr>\n  <tr style=\"background-color: #f2f2f2;\">\n    <td style=\"padding: 10px; border: 1px solid #ddd;\"><strong>Total Repair Fee</strong></td>\n    <td style=\"padding: 10px; border: 1px solid #ddd;\">NZD {{ $json.totalRepairFee }}</td>\n  </tr>\n  <tr>\n    <td style=\"padding: 10px; border: 1px solid #ddd;\"><strong>Repair Revenue</strong></td>\n    <td style=\"padding: 10px; border: 1px solid #ddd;\">NZD {{ $json.totalRepairRevenue }}</td>\n  </tr>\n</table>\n\n<br>\n<p>Please do not hesitate to contact us if you have any questions.</p>\n\n<p>Kind regards,<br>\n<strong>Daisy Song</strong><br>\nHearing Clinic</p>",
+        "options": {
+          "attachmentsUi": {
+            "attachmentsBinary": [
+              {}
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        384,
+        64
+      ],
+      "id": "1d5db7ab-3a9d-4c51-a858-bf0f01130ca2",
+      "name": "Send to Resound",
+      "webhookId": "05e532a9-a2e9-4b80-b7bd-8f02b8e15ef9",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "KSfJ66EkZPNjjcNB",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const formatNZD = (amount) => {\n  return Number(amount).toLocaleString('en-NZ', {\n    minimumFractionDigits: 2,\n    maximumFractionDigits: 2\n  });\n};\nconst rows = $input.all();\n\nconst headers = [\n  'Date', 'Hospital', 'Patient', 'Brand', 'Model', 'Ear Side',\n  'Transaction Type', 'Sale Price (NZD)', 'Repair Fee (NZD)'\n];\n\nconst lines = [headers.join(',')];\n\nlet totalSalePrice = 0;\nlet totalRepairFee = 0;\n\nfor (const row of rows) {\n  const d = row.json;\n  const date = new Date(d.record_date).toLocaleDateString('en-NZ', {day:'2-digit', month:'2-digit', year:'numeric'}).replace(/\\//g, '-');\n  totalSalePrice += Number(d.sale_price);\n  totalRepairFee += Number(d.repair_fee);\n\n  lines.push([\n    date,\n    `\"${d.hospital_name}\"`,\n    `\"${d.patient_name}\"`,\n    d.brand || '',\n    `\"${d.product_model || ''}\"`,\n    d.ear_side || '',\n    d.transaction_type,\n    d.sale_price,\n    d.repair_fee\n  ].join(','));\n}\n\nlines.push([\n  '', '', '', '', '', '', 'TOTAL',\n  totalSalePrice.toFixed(2),\n  totalRepairFee.toFixed(2)\n].join(','));\n\nconst csvContent = lines.join('\\n');\nconst base64 = Buffer.from(csvContent).toString('base64');\nconst monthLabel = $('Date Filter').first().json.monthLabel;\n\nreturn [{\n  json: {\n    fileName: `Multi_Brand_Closing_${monthLabel.replace(' ', '_')}.csv`,\n    monthLabel,\n    totalSalePrice: formatNZD(totalSalePrice),\n    totalRepairFee: formatNZD(totalRepairFee)\n  },\n  binary: {\n    data: {\n      data: Buffer.from(csvContent).toString('base64'),\n      mimeType: 'text/csv',\n      fileName: `Multi_Brand_Closing_${monthLabel.replace(' ', '_')}.csv`\n    }\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        160,
+        256
+      ],
+      "id": "db7d10e1-deb2-4f13-aa4f-4ab9d9686f75",
+      "name": "Generate Excel (Internal Report)"
+    },
+    {
+      "parameters": {
+        "sendTo": "resound@examples.com",
+        "subject": "=Multi-Brand Closing Report - {{ $json.monthLabel }}",
+        "message": "=<p>Dear <strong>Team</strong>,</p>\n\n<p>Please find attached the multi-brand closing report for <strong>{{ $json.monthLabel }}</strong>.</p>\n\n<table style=\"border-collapse: collapse; width: 350px;\">\n  <tr style=\"background-color: #f2f2f2;\">\n    <td style=\"padding: 10px; border: 1px solid #ddd;\"><strong>Total Sales</strong></td>\n    <td style=\"padding: 10px; border: 1px solid #ddd;\">NZD {{ $json.totalSalePrice }}</td>\n  </tr>\n  <tr>\n    <td style=\"padding: 10px; border: 1px solid #ddd;\"><strong>Total Repair Fee</strong></td>\n    <td style=\"padding: 10px; border: 1px solid #ddd;\">NZD {{ $json.totalRepairFee }}</td>\n  </tr>\n</table>\n\n<br>\n<p>Please refer to the attached CSV file for detailed transaction records.</p>\n\n<p>Kind regards,<br>\n<strong>Daisy Song</strong><br>\nHearing Clinic</p>",
+        "options": {
+          "attachmentsUi": {
+            "attachmentsBinary": [
+              {}
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        384,
+        256
+      ],
+      "id": "2822a45b-0970-414c-957d-3f61e9e444a3",
+      "name": "Internal Report",
+      "webhookId": "05e532a9-a2e9-4b80-b7bd-8f02b8e15ef9",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "KSfJ66EkZPNjjcNB",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Date Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Date Filter": {
+      "main": [
+        [
+          {
+            "node": "Hospital Settlement",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Resound Closing",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Competitor Closing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Hospital Settlement": {
+      "main": [
+        [
+          {
+            "node": "Generate Excel (Hospital)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Resound Closing": {
+      "main": [
+        [
+          {
+            "node": "Generate Excel (Resound)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Competitor Closing": {
+      "main": [
+        [
+          {
+            "node": "Generate Excel (Internal Report)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Excel (Hospital)": {
+      "main": [
+        [
+          {
+            "node": "Send to Hospital",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Excel (Resound)": {
+      "main": [
+        [
+          {
+            "node": "Send to Resound",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send to Resound": {
+      "main": [
+        []
+      ]
+    },
+    "Generate Excel (Internal Report)": {
+      "main": [
+        [
+          {
+            "node": "Internal Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "8776b23f-6f77-44ae-96b4-40eb86138e3e",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "558d88703fb65b2d0e44613bc35916258b0f0bf983c5d4730c00c424b77ca36a"
+  },
+  "nodeGroups": [],
+  "id": "gFMpqQVGw0gs3dNk",
+  "tags": []
+}

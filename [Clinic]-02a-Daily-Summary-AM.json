@@ -1,0 +1,167 @@
+{
+  "name": "[Clinic]-02a-Daily-Summary-AM",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 13
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -880,
+        0
+      ],
+      "id": "fc40bb7f-06d1-421c-a8b2-f0c11e443bdb",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "18ppVYfjkm36e9sHydlhpd-HY4f_PPhkwBEcKCa6jcLc",
+          "mode": "list",
+          "cachedResultName": "clinic_sales_records",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/18ppVYfjkm36e9sHydlhpd-HY4f_PPhkwBEcKCa6jcLc/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1482173345,
+          "mode": "list",
+          "cachedResultName": "clinic_sales_records.csv",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/18ppVYfjkm36e9sHydlhpd-HY4f_PPhkwBEcKCa6jcLc/edit#gid=1482173345"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -720,
+        0
+      ],
+      "id": "6c7db07f-23ad-4636-b0a2-18b48c355fca",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "pkDVuT9NRFh74fak",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const today = $now.setZone('Pacific/Auckland').toFormat('dd-MM-yyyy');\n\nreturn $input.all().filter(item => {\n  const dateStr = String(item.json.record_date);\n  return dateStr === today;\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -560,
+        0
+      ],
+      "id": "576b364b-715c-4c6f-b27f-51959c91f4bd",
+      "name": "Date Filter",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst todayWeekday = $now.setZone('Pacific/Auckland').weekday; // 1=Mon ~ 7=Sun\n\nconst hospitals = {\n  'H-001': {\n    name: 'Christchurch ENT Clinic',\n    email: 'chchent@examples.com',\n    audiologist: 'Daisy Song',\n    workdays: [1, 2, 3, 4, 5],\n    shift: 'AM'\n  },\n  'H-002': {\n    name: 'Selwyn Hearing Centre',\n    email: 'selwynhearing@examples.com',\n    audiologist: 'Daisy Song',\n    workdays: [1, 3, 5],\n    shift: 'PM'\n  },\n  'H-003': {\n    name: 'Canterbury Audiology Associates',\n    email: 'Canterburyaa@examples.com',\n    audiologist: 'Daisy Song',\n    workdays: [2, 4],\n    shift: 'PM'\n  }\n};\n\n// Working on 'AM' \nconst targetShift = 'AM';\n\nconst summary = {};\nObject.entries(hospitals)\n  .filter(([id, h]) => h.shift === targetShift && h.workdays.includes(todayWeekday))\n  .forEach(([id, h]) => {\n    summary[id] = {\n      hospital_id:        id,\n      hospital_name:      h.name,\n      recipient_email:    h.email,\n      audiologist:        h.audiologist,\n      date:               $now.setZone('Pacific/Auckland').toFormat('dd-MM-yyyy'),\n      new_consultations:  0,\n      fittings_completed: 0,\n      repairs_completed:  0,\n      total_sales_nzd:    0,\n      total_repair_nzd:   0\n    };\n  });\n\nitems.forEach(item => {\n  const d   = item.json;\n  const hid = d.hospital_id;\n  if (!summary[hid]) return;\n\n  if (d.transaction_type === 'New Consultation')  summary[hid].new_consultations++;\n  if (d.transaction_type === 'Fitting Completed') summary[hid].fittings_completed++;\n  if (d.transaction_type === 'Repair Completed')  summary[hid].repairs_completed++;\n  summary[hid].total_sales_nzd  += Number(d.sale_price_nzd) || 0;\n  summary[hid].total_repair_nzd += Number(d.repair_fee_nzd) || 0;\n});\n\nreturn Object.values(summary).map(s => ({ json: s }));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -400,
+        0
+      ],
+      "id": "c10e7c43-fbf3-4ba6-9d26-d6e372fb0384",
+      "name": "Daily Aggregator"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.recipient_email }}",
+        "subject": "=Daily Clinic Summary -  {{ $json.hospital_name }} ({{ $json.date }})",
+        "message": "=<div style=\"font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;\">\n  <h2 style=\"color: #2c3e50; border-bottom: 2px solid #607d8b; padding-bottom: 10px;\">\n    Daily Clinic Summary\n  </h2>\n  <p style=\"color: #7f8c8d;\">{{ $json.hospital_name }} ({{ $json.date }})</p>\n\n  <table style=\"width:100%; border-collapse:collapse; margin-top: 20px;\">\n    <tr style=\"background-color:#607d8b; color:white;\">\n      <th style=\"padding:12px; text-align:left;\">Category</th>\n      <th style=\"padding:12px; text-align:center;\">Count</th>\n    </tr>\n    <tr style=\"background-color:#f8f9fa;\">\n      <td style=\"padding:12px; border-bottom:1px solid #dee2e6;\">New Consultations</td>\n      <td style=\"padding:12px; text-align:center; border-bottom:1px solid #dee2e6;\">{{ $json.new_consultations }}</td>\n    </tr>\n    <tr>\n      <td style=\"padding:12px; border-bottom:1px solid #dee2e6;\">Fittings Completed</td>\n      <td style=\"padding:12px; text-align:center; border-bottom:1px solid #dee2e6;\">{{ $json.fittings_completed }}</td>\n    </tr>\n    <tr style=\"background-color:#f8f9fa;\">\n      <td style=\"padding:12px; border-bottom:1px solid #dee2e6;\">Repairs Completed</td>\n      <td style=\"padding:12px; text-align:center; border-bottom:1px solid #dee2e6;\">{{ $json.repairs_completed }}</td>\n    </tr>\n  </table>\n\n  <table style=\"width:100%; border-collapse:collapse; margin-top: 20px;\">\n    <tr style=\"background-color:#607d8b; color:white;\">\n      <th style=\"padding:12px; text-align:left;\">Revenue</th>\n      <th style=\"padding:12px; text-align:right;\">Amount (NZD)</th>\n    </tr>\n    <tr style=\"background-color:#f8f9fa;\">\n      <td style=\"padding:12px; border-bottom:1px solid #dee2e6;\">Total Sales</td>\n      <td style=\"padding:12px; text-align:right; border-bottom:1px solid #dee2e6;\">NZD {{ $json.total_sales_nzd.toLocaleString() }}</td>\n    </tr>\n    <tr>\n      <td style=\"padding:12px;\">Total Repair Revenue</td>\n      <td style=\"padding:12px; text-align:right;\">NZD {{ $json.total_repair_nzd.toLocaleString() }}</td>\n    </tr>\n  </table>\n\n  <p style=\"color:#95a5a6; font-size:12px; margin-top:30px; border-top: 1px solid #dee2e6; padding-top:10px;\">\n    {{ $json.audiologist }} — Hearing Aid Clinic Pipeline\n  </p>\n</div>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        -224,
+        0
+      ],
+      "id": "de24ed30-0ee9-4ed0-8152-79e5babcfbb9",
+      "name": "Send a message",
+      "webhookId": "e67e9776-1602-42fd-9ca4-bf7022315059",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "KSfJ66EkZPNjjcNB",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Date Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Date Filter": {
+      "main": [
+        [
+          {
+            "node": "Daily Aggregator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Daily Aggregator": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "ad754df8-3c26-4d36-9014-e602ceeaba2e",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "558d88703fb65b2d0e44613bc35916258b0f0bf983c5d4730c00c424b77ca36a"
+  },
+  "nodeGroups": [],
+  "id": "gb6NZoC5lDTDbuu8",
+  "tags": []
+}
