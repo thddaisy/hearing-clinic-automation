@@ -141,25 +141,25 @@ Note: Workflows reference a local PostgreSQL instance on port 5432. Update the P
 ## Sample Output
 
 ### Workflow 01 — PDF Chart Ingestion
-![Workflow 01](docs/screenshots/workflow01.jpg)
+![Workflow 01](screenshots/workflow01.jpg)
 
 ### Workflow 02 — Daily Summary Email
-![Workflow 02](docs/screenshots/workflow02.jpg)
+![Workflow 02](screenshots/workflow02.jpg)
 
 *Daily clinic summary sent to supervising doctors at the end of each session*
 
-![Daily Email](docs/screenshots/Daily_email.jpg)
+![Daily Email](screenshots/Daily_email.jpg)
 
 ### Workflow 03 — Monthly Settlement
-![Workflow 03](docs/screenshots/workflow03.jpg)
+![Workflow 03](screenshots/workflow03.jpg)
 
 *Hospital settlement report sent to each hospital individually*
 
-![Hospital Monthly](docs/screenshots/hospital_monthly.jpg)
+![Hospital Monthly](screenshots/hospital_monthly.jpg)
 
 *ReSound closing report sent to the ReSound team*
 
-![ReSound Closing](docs/screenshots/resound_closing.jpg)
+![ReSound Closing](screenshots/resound_closing.jpg)
 
 ## About This Project
 
