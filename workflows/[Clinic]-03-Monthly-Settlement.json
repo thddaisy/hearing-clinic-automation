@@ -87,7 +87,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// 테스트용 - 현재 달 조회\nconst now = new Date();\nconst firstDay = new Date(now.getFullYear(), now.getMonth(), 1);\nconst lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);\n\nconst toNZ = (d) => {\n  const dd = String(d.getDate()).padStart(2, '0');\n  const mm = String(d.getMonth() + 1).padStart(2, '0');\n  const yyyy = d.getFullYear();\n  return `${dd}-${mm}-${yyyy}`;\n};\n\nconst toISO = (d) => d.toISOString().split('T')[0];\n\nconst monthLabel = firstDay.toLocaleString('en-NZ', { year: 'numeric', month: 'long' });\n\nreturn [{\n  json: {\n    dateFrom: toISO(firstDay),   // PostgreSQL  \"2025-05-01\"\n    dateTo: toISO(lastDay),      // PostgreSQL  \"2025-05-31\"\n    dateFromNZ: toNZ(firstDay),  // Display \"01-05-2025\"\n    dateToNZ: toNZ(lastDay),     // Display \"31-05-2025\"\n    monthLabel                   // \"May 2025\"\n  }\n}];"
+        "jsCode": "const now = new Date();\n\nconst firstDay = new Date(now.getFullYear(), now.getMonth() - 1, 1);\nconst lastDay = new Date(now.getFullYear(), now.getMonth(), 0);\n\nconst toNZ = (d) => {\n  const dd = String(d.getDate()).padStart(2, '0');\n  const mm = String(d.getMonth() + 1).padStart(2, '0');\n  const yyyy = d.getFullYear();\n  return `${dd}-${mm}-${yyyy}`;\n};\n\nconst toISO = (d) => d.toISOString().split('T')[0];\n\nconst monthLabel = firstDay.toLocaleString('en-NZ', { year: 'numeric', month: 'long' });\n\nreturn [{\n  json: {\n    dateFrom: toISO(firstDay),\n    dateTo: toISO(lastDay),\n    dateFromNZ: toNZ(firstDay),\n    dateToNZ: toNZ(lastDay),\n    monthLabel\n  }\n}];"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -184,19 +184,6 @@
     },
     {
       "parameters": {
-        "jsCode": "const formatNZD = (amount) => {\n  return Number(amount).toLocaleString('en-NZ', {\n    minimumFractionDigits: 2,\n    maximumFractionDigits: 2\n  });\n};\nconst rows = $input.all();\n\nconst headers = [\n  'Date', 'Hospital', 'Patient', 'Brand', 'Model', 'Ear Side',\n  'Transaction Type', 'Sale Price (NZD)', 'Repair Fee (NZD)'\n];\n\nconst lines = [headers.join(',')];\n\nlet totalSalePrice = 0;\nlet totalRepairFee = 0;\n\nfor (const row of rows) {\n  const d = row.json;\n  const date = new Date(d.record_date).toLocaleDateString('en-NZ', {day:'2-digit', month:'2-digit', year:'numeric'}).replace(/\\//g, '-');\n  totalSalePrice += Number(d.sale_price);\n  totalRepairFee += Number(d.repair_fee);\n\n  lines.push([\n    date,\n    `\"${d.hospital_name}\"`,\n    `\"${d.patient_name}\"`,\n    d.brand || '',\n    `\"${d.product_model || ''}\"`,\n    d.ear_side || '',\n    d.transaction_type,\n    d.sale_price,\n    d.repair_fee\n  ].join(','));\n}\n\nlines.push([\n  '', '', '', '', '', '', 'TOTAL',\n  totalSalePrice.toFixed(2),\n  totalRepairFee.toFixed(2)\n].join(','));\n\nconst csvContent = lines.join('\\n');\nconst base64 = Buffer.from(csvContent).toString('base64');\nconst monthLabel = $('Date Filter').first().json.monthLabel;\n\nreturn [{\n  json: {\n    fileName: `Multi_Brand_Closing_${monthLabel.replace(' ', '_')}.csv`,\n    monthLabel,\n    totalSalePrice: formatNZD(totalSalePrice),\n    totalRepairFee: formatNZD(totalRepairFee)\n  },\n  binary: {\n    data: {\n      data: Buffer.from(csvContent).toString('base64'),\n      mimeType: 'text/csv',\n      fileName: `Multi_Brand_Closing_${monthLabel.replace(' ', '_')}.csv`\n    }\n  }\n}];"
-      },
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        160,
-        256
-      ],
-      "id": "db7d10e1-deb2-4f13-aa4f-4ab9d9686f75",
-      "name": "Generate Excel (Internal Report)"
-    },
-    {
-      "parameters": {
         "sendTo": "resound@examples.com",
         "subject": "=Multi-Brand Closing Report - {{ $json.monthLabel }}",
         "message": "=<p>Dear <strong>Team</strong>,</p>\n\n<p>Please find attached the multi-brand closing report for <strong>{{ $json.monthLabel }}</strong>.</p>\n\n<table style=\"border-collapse: collapse; width: 350px;\">\n  <tr style=\"background-color: #f2f2f2;\">\n    <td style=\"padding: 10px; border: 1px solid #ddd;\"><strong>Total Sales</strong></td>\n    <td style=\"padding: 10px; border: 1px solid #ddd;\">NZD {{ $json.totalSalePrice }}</td>\n  </tr>\n  <tr>\n    <td style=\"padding: 10px; border: 1px solid #ddd;\"><strong>Total Repair Fee</strong></td>\n    <td style=\"padding: 10px; border: 1px solid #ddd;\">NZD {{ $json.totalRepairFee }}</td>\n  </tr>\n</table>\n\n<br>\n<p>Please refer to the attached CSV file for detailed transaction records.</p>\n\n<p>Kind regards,<br>\n<strong>Daisy Song</strong><br>\nHearing Clinic</p>",
@@ -223,6 +210,19 @@
           "name": "Gmail account"
         }
       }
+    },
+    {
+      "parameters": {
+        "jsCode": "const formatNZD = (amount) => {\n  return Number(amount).toLocaleString('en-NZ', {\n    minimumFractionDigits: 2,\n    maximumFractionDigits: 2\n  });\n};\nconst rows = $input.all();\n\nconst headers = [\n  'Date', 'Hospital', 'Patient', 'Brand', 'Model', 'Ear Side',\n  'Transaction Type', 'Sale Price (NZD)', 'Repair Fee (NZD)'\n];\n\nconst lines = [headers.join(',')];\n\nlet totalSalePrice = 0;\nlet totalRepairFee = 0;\n\nfor (const row of rows) {\n  const d = row.json;\n  const date = new Date(d.record_date).toLocaleDateString('en-NZ', {day:'2-digit', month:'2-digit', year:'numeric'}).replace(/\\//g, '-');\n  totalSalePrice += Number(d.sale_price);\n  totalRepairFee += Number(d.repair_fee);\n\n  lines.push([\n    date,\n    `\"${d.hospital_name}\"`,\n    `\"${d.patient_name}\"`,\n    d.brand || '',\n    `\"${d.product_model || ''}\"`,\n    d.ear_side || '',\n    d.transaction_type,\n    d.sale_price,\n    d.repair_fee\n  ].join(','));\n}\n\nlines.push([\n  '', '', '', '', '', '', 'TOTAL',\n  totalSalePrice.toFixed(2),\n  totalRepairFee.toFixed(2)\n].join(','));\n\nconst csvContent = lines.join('\\n');\nconst base64 = Buffer.from(csvContent).toString('base64');\nconst monthLabel = $('Date Filter').first().json.monthLabel;\n\nreturn [{\n  json: {\n    fileName: `Multi_Brand_Closing_${monthLabel.replace(' ', '_')}.csv`,\n    monthLabel,\n    totalSalePrice: formatNZD(totalSalePrice),\n    totalRepairFee: formatNZD(totalRepairFee)\n  },\n  binary: {\n    data: {\n      data: Buffer.from(csvContent).toString('base64'),\n      mimeType: 'text/csv',\n      fileName: `Multi_Brand_Closing_${monthLabel.replace(' ', '_')}.csv`\n    }\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        160,
+        256
+      ],
+      "id": "db7d10e1-deb2-4f13-aa4f-4ab9d9686f75",
+      "name": "Generate Excel (Multi-Brand)"
     }
   ],
   "pinData": {},
@@ -285,7 +285,7 @@
       "main": [
         [
           {
-            "node": "Generate Excel (Internal Report)",
+            "node": "Generate Excel (Multi-Brand)",
             "type": "main",
             "index": 0
           }
@@ -319,7 +319,7 @@
         []
       ]
     },
-    "Generate Excel (Internal Report)": {
+    "Generate Excel (Multi-Brand)": {
       "main": [
         [
           {
@@ -336,7 +336,7 @@
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "8776b23f-6f77-44ae-96b4-40eb86138e3e",
+  "versionId": "b25a36e4-f932-44bf-ada0-7247d24a95b2",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "558d88703fb65b2d0e44613bc35916258b0f0bf983c5d4730c00c424b77ca36a"
