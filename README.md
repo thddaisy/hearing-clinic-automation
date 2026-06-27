@@ -65,7 +65,8 @@ Each workflow:
 **Key design decisions:**
 - Timezone is explicitly set to `Pacific/Auckland` throughout to avoid UTC date mismatch
 - Hospital metadata (name, recipient email, working days, shift) is managed in a single `hospitals` config object within the Code node, making it easy to add or update clinics without touching the workflow structure
-- A clinic with zero transactions on a scheduled day still receives an email if it is a working day , reflecting the real-world expectation that a daily summary is sent regardless of volume
+- Workflows are split by shift rather than by clinic close time — the trigger fires when the audiologist's session ends, ensuring the daily summary reflects a complete working session. AM clinics receive their report at 13:00 and PM clinics at 18:00, matching the audiologist's actual sign-off time at each location
+- A clinic with zero transactions on a scheduled day still receives an email if it is a working day, reflecting the real-world expectation that a daily summary is sent regardless of volume
 - Revenue share rate differs per hospital (50%, 30%, 35%) and is stored in the PostgreSQL `hospitals` master table for use in monthly settlement queries
 
 ### 3. Monthly Multi-Stakeholder Settlement
@@ -136,6 +137,29 @@ Exported n8n workflow JSON files are available in [`workflows/`](workflows/) and
 - [`[Clinic]-03-Monthly-Settlement.json`](workflows/[Clinic]-03-Monthly-Settlement.json)
 
 Note: Workflows reference a local PostgreSQL instance on port 5432. Update the PostgreSQL credential in n8n before importing.
+
+## Sample Output
+
+### Workflow 01 — PDF Chart Ingestion
+![Workflow 01](docs/screenshots/workflow01.jpg)
+
+### Workflow 02 — Daily Summary Email
+![Workflow 02](docs/screenshots/workflow02.jpg)
+
+*Daily clinic summary sent to supervising doctors at the end of each session*
+
+![Daily Email](docs/screenshots/Daily_email.jpg)
+
+### Workflow 03 — Monthly Settlement
+![Workflow 03](docs/screenshots/workflow03.jpg)
+
+*Hospital settlement report sent to each hospital individually*
+
+![Hospital Monthly](docs/screenshots/hospital_monthly.jpg)
+
+*ReSound closing report sent to the ReSound team*
+
+![ReSound Closing](docs/screenshots/resound_closing.jpg)
 
 ## About This Project
 
