@@ -118,6 +118,8 @@ The settlement rules are handled entirely at the SQL layer rather than in workfl
 
 [`mock-data/clinic_sales_records.csv`](mock-data/clinic_sales_records.csv) contains 96 rows covering June 2026, distributed across three hospitals and all three transaction types (new consultation, fitting completed, repair completed).
 
+Sample PDF consultation charts are available in [`mock-data/pdf-charts/`](mock-data/pdf-charts/) and can be used to test Workflow 01 end-to-end. Each chart follows the clinic's standard format and is assigned to one of the three hospitals.
+
 Key design choices in the mock data:
 - ReSound (in-house brand) accounts for the majority of fittings, reflecting a realistic clinic where the primary brand dominates
 - Each patient is assigned to one hospital only, with a hospital-specific chart number prefix (P1-xxx for H-001, P2-xxx for H-002, P3-xxx for H-003) , matching how medical record numbers work in practice
